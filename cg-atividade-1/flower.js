@@ -67,38 +67,23 @@ function makeCircle(cx, cy, radius, numSides, centerColor, edgeColor) {
     };
 }
 
-// function makeRectangle(x1, y1, x2, y2, color) {
-//     const vertices = [
-//         x1, y1,
-//         x2, y1,
-//         x2, y2,
-//         x1, y2
-//     ];
-
-//     const colors = [];
-//     for (let i = 0; i < 4; i++) {
-//         colors.push(...color);
-//     }
-
-//     return { vertices, colors };
-// }
-
 function setSquareVertices4(x,y,weight,height){
     return new Float32Array([
-        x,y+height,
-        x+weight,y+height,
-        x+weight,y,
-        x,y,
-        x+weight,y,
-        x,y+height
+        x+0.4,y+height+0.05,
+        x+weight+0.35,y+height+0.05,
+        x+weight+0.35,y,
+        x+0.4,y,
+        x+weight+0.35,y,
+        x+0.4,y+height+0.05
     ]);
 }
 
-function setSquareColors4(){
-    let color = [0.0, 1.0, 0.0];
-    let colorValues = [];
-    for(let i=0;i<6;i++)
+function setSquareColors4() {
+    const color = [0.0, 1.0, 0.0, 1.0]; // verde opaco RGBA
+    const colorValues = [];
+    for (let i = 0; i < 6; i++) {
         colorValues.push(...color);
+    }
     return new Float32Array(colorValues);
 }
 
@@ -108,11 +93,6 @@ function buildFlower(petalCount = 6, petalDistance = 0.7) {
 
     const numSides = 60;
     const circleVertexCount = numSides + 2; // center + numSides + repeat
-
-    // // stem rectangle (goes below the center)
-    // let stem = setSquareVertices4(-0.05, -1.0, 0.05, -0.3, [0.0, 0.8, 0.0, 1.0]); // green
-    // allVertices.push(...stem.vertices);
-    // allColors.push(...stem.colors);
 
     // store vertex count separately since it's not a circle
     const stemVertexCount = 4;
@@ -126,7 +106,7 @@ function buildFlower(petalCount = 6, petalDistance = 0.7) {
 
         let circle = makeCircle(cx, cy, 0.22, numSides,
             [1, 0.6, 0.8, 1],
-            [1, 0.0, 0.5, 1]);
+            [1, 0.0, 0.0, 1]);
 
         allVertices.push(...circle.vertices);
         allColors.push(...circle.colors);
@@ -155,6 +135,7 @@ function mainFan() {
         console.error('WebGL not supported');
         return;
     }
+
 
     const vertexShader = createShaderFan(gl, gl.VERTEX_SHADER, vertexShaderSourceFan);
     const fragmentShader = createShaderFan(gl, gl.FRAGMENT_SHADER, fragmentShaderSourceFan);
@@ -189,17 +170,17 @@ function mainFan() {
         gl.drawArrays(gl.TRIANGLE_FAN, offset, circleVertexCount);
     }
     
-    gl.enableVertexAttribArray(positionLocation);
+    // Desenhar o quadrado - CORREÇÃO AQUI
     vertices = setSquareVertices4(-0.5,-1,0.25,0.25);
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    gl.enableVertexAttribArray(colorLocation);
     colors = setSquareColors4();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
+    // CORREÇÃO: mudar de 3 para 4 componentes (RGBA)
+    gl.vertexAttribPointer(colorLocation, 4, gl.FLOAT, false, 0, 0);
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
